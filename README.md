@@ -23,7 +23,8 @@ Google** yang bikin web push gagal. Notifikasi muncul walau app & web tak dibuka
 Syarat: Android Studio terbaru (JDK 17 sudah bawaan). minSdk = Android 8 (API 26).
 
 ## Pemakaian (di HP)
-1. Buka app **STC Notif**.
+1. Buka app **STC Notif** → masukkan **password** di layar awal (gerbang agar tak
+   dipakai orang lain). Password disimpan sebagai hash SHA-256, bukan teks.
 2. **URL server**: sudah terisi `https://admin.stcautotrade.id`.
 3. **Token**: tempel `NOTIFY_TOKEN` dari server (`~/webadmin-stc/.env` di VPS).
    Token TIDAK disertakan di repo ini demi keamanan — ambil dari server, atau

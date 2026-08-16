@@ -127,7 +127,7 @@ class NotifierService : Service() {
 
     private fun ongoingNotif(text: String): android.app.Notification {
         val pi = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java),
+            this, 0, Intent(this, LockActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, App.CH_ONGOING)
@@ -143,7 +143,7 @@ class NotifierService : Service() {
 
     private fun notifyEvent(type: String, title: String, body: String, key: String) {
         val pi = PendingIntent.getActivity(
-            this, 1, Intent(this, MainActivity::class.java),
+            this, 1, Intent(this, LockActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val n = NotificationCompat.Builder(this, App.CH_ALERT)

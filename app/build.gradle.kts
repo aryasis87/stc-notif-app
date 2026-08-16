@@ -24,8 +24,8 @@ android {
         // targetSdk 34 SENGAJA (bukan 35/36): hindari batas 6 jam/hari foreground
         // service tipe dataSync yang berlaku sejak Android 15 (target 35+).
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     signingConfigs {
