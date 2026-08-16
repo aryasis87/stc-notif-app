@@ -10,31 +10,40 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Palet bergaya iOS (grouped background + kartu putih + aksen clay merek).
+// Inter (variable) sebagai pengganti SF Pro — memberi rasa "Apple".
+@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+private fun interW(w: Int) = Font(
+    R.font.inter,
+    weight = FontWeight(w),
+    variationSettings = FontVariation.Settings(FontVariation.weight(w)),
+)
+private val Inter = FontFamily(interW(400), interW(500), interW(600), interW(700))
+
+// Palet presisi bergaya iOS (systemGroupedBackground / secondary / label / separator).
 object AppColors {
-    // light
     val bgLight = Color(0xFFF2F2F7)
     val cardLight = Color(0xFFFFFFFF)
-    val card2Light = Color(0xFFFFFFFF)
     val labelLight = Color(0xFF1C1C1E)
-    val label2Light = Color(0xFF8E8E93)
-    val sepLight = Color(0xFFE3E3E8)
-    // dark
+    val label2Light = Color(0xFF6E6E73)
+    val sepLight = Color(0xFFD9D9DE)
+
     val bgDark = Color(0xFF000000)
     val cardDark = Color(0xFF1C1C1E)
-    val card2Dark = Color(0xFF2C2C2E)
     val labelDark = Color(0xFFFFFFFF)
     val label2Dark = Color(0xFF98989F)
     val sepDark = Color(0xFF38383A)
-    // accent (clay merek)
+
     val accentLight = Color(0xFFBD5B3A)
-    val accentDark = Color(0xFFE0805E)
-    // semantik
+    val accentDark = Color(0xFFE58A6D)
+
+    // semantik iOS
     val green = Color(0xFF34C759)
     val red = Color(0xFFFF3B30)
     val blue = Color(0xFF0A84FF)
@@ -42,50 +51,41 @@ object AppColors {
 }
 
 private val LightScheme = lightColorScheme(
-    primary = AppColors.accentLight,
-    onPrimary = Color.White,
-    background = AppColors.bgLight,
-    onBackground = AppColors.labelLight,
-    surface = AppColors.cardLight,
-    onSurface = AppColors.labelLight,
-    surfaceVariant = AppColors.card2Light,
-    onSurfaceVariant = AppColors.label2Light,
-    outline = AppColors.sepLight,
+    primary = AppColors.accentLight, onPrimary = Color.White,
+    background = AppColors.bgLight, onBackground = AppColors.labelLight,
+    surface = AppColors.cardLight, onSurface = AppColors.labelLight,
+    surfaceVariant = AppColors.cardLight, onSurfaceVariant = AppColors.label2Light,
+    outline = AppColors.sepLight, outlineVariant = AppColors.sepLight,
     error = AppColors.red,
 )
-
 private val DarkScheme = darkColorScheme(
-    primary = AppColors.accentDark,
-    onPrimary = Color(0xFF241009),
-    background = AppColors.bgDark,
-    onBackground = AppColors.labelDark,
-    surface = AppColors.cardDark,
-    onSurface = AppColors.labelDark,
-    surfaceVariant = AppColors.card2Dark,
-    onSurfaceVariant = AppColors.label2Dark,
-    outline = AppColors.sepDark,
+    primary = AppColors.accentDark, onPrimary = Color(0xFF241009),
+    background = AppColors.bgDark, onBackground = AppColors.labelDark,
+    surface = AppColors.cardDark, onSurface = AppColors.labelDark,
+    surfaceVariant = AppColors.cardDark, onSurfaceVariant = AppColors.label2Dark,
+    outline = AppColors.sepDark, outlineVariant = AppColors.sepDark,
     error = AppColors.red,
 )
 
-private val SF = FontFamily.Default // sistem (mendekati SF/Roboto)
+private fun t(w: Int, size: Int, line: Int, ls: Double = 0.0) =
+    TextStyle(fontFamily = Inter, fontWeight = FontWeight(w), fontSize = size.sp, lineHeight = line.sp, letterSpacing = ls.sp)
 
 private val AppType = Typography(
-    // large title iOS
-    displaySmall = TextStyle(fontFamily = SF, fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 38.sp, letterSpacing = (-0.5).sp),
-    headlineMedium = TextStyle(fontFamily = SF, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.3).sp),
-    titleLarge = TextStyle(fontFamily = SF, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 25.sp),
-    titleMedium = TextStyle(fontFamily = SF, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, lineHeight = 22.sp),
-    bodyLarge = TextStyle(fontFamily = SF, fontWeight = FontWeight.Normal, fontSize = 17.sp, lineHeight = 22.sp),
-    bodyMedium = TextStyle(fontFamily = SF, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 20.sp),
-    labelLarge = TextStyle(fontFamily = SF, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
-    bodySmall = TextStyle(fontFamily = SF, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 17.sp),
-    labelSmall = TextStyle(fontFamily = SF, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.2.sp),
+    displaySmall = t(700, 30, 36, -0.6),   // large title
+    headlineMedium = t(700, 23, 28, -0.4), // title
+    titleLarge = t(600, 19, 24, -0.2),
+    titleMedium = t(600, 16, 21, -0.1),
+    bodyLarge = t(400, 16, 21),
+    bodyMedium = t(400, 14, 19),
+    labelLarge = t(600, 16, 20),
+    bodySmall = t(400, 13, 17),
+    labelSmall = t(500, 12, 15, 0.2),
 )
 
 private val AppShapes = Shapes(
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(22.dp),
+    large = RoundedCornerShape(20.dp),
 )
 
 @Composable

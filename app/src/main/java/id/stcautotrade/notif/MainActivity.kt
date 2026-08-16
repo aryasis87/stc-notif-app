@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,9 +18,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent { STCNotifTheme { Surface(color = MaterialTheme.colorScheme.background) { AppRoot() } } }
     }
@@ -50,7 +52,8 @@ fun AppRoot() {
     }
 }
 
-// ── Login (Apple-like) ───────────────────────────────────────────────────────
+// ── Login ────────────────────────────────────────────────────────────────────
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(onLoggedIn: () -> Unit) {
     val ctx = LocalContext.current
@@ -82,19 +85,17 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
         }
     }
 
-    Box(Modifier.fillMaxSize().padding(28.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(max = 420.dp)) {
-            Box(
-                Modifier.size(76.dp).padding(bottom = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.primary) {
-                    Box(Modifier.size(76.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Notifications, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(40.dp))
-                    }
+    Box(
+        Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 26.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(max = 440.dp)) {
+            Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.primary, shadowElevation = 10.dp) {
+                Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.Notifications, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(42.dp))
                 }
             }
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(22.dp))
             Text("STC Notif", style = MaterialTheme.typography.displaySmall)
             Spacer(Modifier.height(6.dp))
             Text(
@@ -103,36 +104,45 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(28.dp))
-            OutlinedTextField(
+            Spacer(Modifier.height(30.dp))
+            TextField(
                 value = pass,
                 onValueChange = { pass = it; error = null },
-                label = { Text("Password") },
+                placeholder = { Text("Password") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
                 keyboardActions = KeyboardActions(onGo = { submit() }),
                 isError = error != null,
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Outlined.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    errorContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent,
+                ),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
             )
             if (error != null) {
-                Spacer(Modifier.height(8.dp))
-                Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                Spacer(Modifier.height(10.dp))
+                Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
             }
             Spacer(Modifier.height(18.dp))
             Button(
                 onClick = { submit() },
                 enabled = !loading && pass.isNotEmpty(),
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(54.dp),
             ) {
-                if (loading) CircularProgressIndicator(Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                if (loading) CircularProgressIndicator(Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                 else Text("Masuk", style = MaterialTheme.typography.labelLarge)
             }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
             Text(
-                "Tanpa isi URL/token — cukup password.",
+                "Cukup password — tanpa isi URL atau token.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -140,7 +150,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
     }
 }
 
-// ── Scaffold + bottom nav ────────────────────────────────────────────────────
+// ── Scaffold + tab bar iOS ───────────────────────────────────────────────────
 private enum class Tab(val label: String, val icon: ImageVector) {
     HOME("Beranda", Icons.Filled.Home),
     NOTIF("Notifikasi", Icons.Filled.Notifications),
@@ -154,24 +164,30 @@ fun MainScaffold(onLogout: () -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                Tab.entries.forEach { t ->
-                    NavigationBarItem(
-                        selected = tab == t,
-                        onClick = { tab = t },
-                        icon = { Icon(t.icon, t.label) },
-                        label = { Text(t.label, style = MaterialTheme.typography.labelSmall) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.background,
-                        ),
-                    )
+            Column {
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
+                    Tab.entries.forEach { tt ->
+                        NavigationBarItem(
+                            selected = tab == tt,
+                            onClick = { tab = tt },
+                            icon = { Icon(tt.icon, tt.label, modifier = Modifier.size(24.dp)) },
+                            label = { Text(tt.label, style = MaterialTheme.typography.labelSmall) },
+                            alwaysShowLabel = true,
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = Color.Transparent,
+                            ),
+                        )
+                    }
                 }
             }
         },
     ) { inner ->
-        Box(Modifier.padding(inner).fillMaxSize()) {
+        Box(Modifier.fillMaxSize().padding(bottom = inner.calculateBottomPadding())) {
             when (tab) {
                 Tab.HOME -> HomeScreen()
                 Tab.NOTIF -> NotificationsScreen()

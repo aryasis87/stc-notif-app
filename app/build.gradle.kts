@@ -22,8 +22,8 @@ android {
         minSdk = 26
         // targetSdk 34 SENGAJA: hindari batas 6 jam/hari foreground service dataSync (API 35+).
         targetSdk = 34
-        versionCode = 3
-        versionName = "2.0"
+        versionCode = 4
+        versionName = "2.1"
     }
 
     signingConfigs {
