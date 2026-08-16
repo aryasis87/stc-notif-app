@@ -337,7 +337,7 @@ fun SettingsScreen(onLogout: () -> Unit) {
         }
 
         Text(
-            "STC Notif v2.1 · admin.stcautotrade.id",
+            "STC Notif v2.2 · admin.stcautotrade.id",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth().padding(20.dp),
