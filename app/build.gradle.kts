@@ -4,9 +4,9 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// Kredensial tanda tangan dibaca dari keystore.properties (di root proyek).
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) load(FileInputStream(keystorePropsFile))
@@ -14,18 +14,16 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "id.stcautotrade.notif"
-    compileSdk = 34
-    // build-tools 34.0.0 tak terpasang; pakai 35.0.0 yang ada di mesin ini.
+    compileSdk = 35
     buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "id.stcautotrade.notif"
         minSdk = 26
-        // targetSdk 34 SENGAJA (bukan 35/36): hindari batas 6 jam/hari foreground
-        // service tipe dataSync yang berlaku sejak Android 15 (target 35+).
+        // targetSdk 34 SENGAJA: hindari batas 6 jam/hari foreground service dataSync (API 35+).
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "2.0"
     }
 
     signingConfigs {
@@ -42,12 +40,13 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     compileOptions {
@@ -61,5 +60,13 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+
+    implementation(platform("androidx.compose:compose-bom:2024.09.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
 }

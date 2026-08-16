@@ -2,4 +2,5 @@
 <resources>
     <color name="clay">#bd5b3a</color>
     <color name="ic_launcher_background">#bd5b3a</color>
+    <color name="win_bg">#F2F2F7</color>
 </resources>

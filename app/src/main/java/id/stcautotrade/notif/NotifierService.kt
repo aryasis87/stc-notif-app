@@ -11,15 +11,13 @@ import androidx.core.app.NotificationManagerCompat
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
-// Foreground service: menarik /api/notify/feed tiap N detik dan memunculkan
-// notifikasi untuk tiap event baru. TANPA FCM/Google — murni HTTPS ke server
-// sendiri, jadi kebal blokir push. START_STICKY + BootReceiver menjaga tetap hidup.
+// Foreground service: menarik /api/notify/feed tiap N detik, memunculkan notifikasi
+// per event baru, + menyimpan ke riwayat (dibaca tab Notifikasi). TANPA FCM.
 class NotifierService : Service() {
     private val running = AtomicBoolean(false)
     @Volatile private var worker: Thread? = null
@@ -28,8 +26,7 @@ class NotifierService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            stopWork()
-            return START_NOT_STICKY
+            stopWork(); return START_NOT_STICKY
         }
         startInForeground("Memantau notifikasi…")
         if (running.compareAndSet(false, true)) {
@@ -75,45 +72,37 @@ class NotifierService : Service() {
     }
 
     private fun poll(prefs: Prefs) {
-        val base = prefs.baseUrl.trim().trimEnd('/')
-        val token = prefs.token.trim()
-        if (base.isEmpty() || token.isEmpty()) {
-            setStatus(prefs, "URL / token belum diisi")
-            return
-        }
+        val token = prefs.token
+        if (token.isEmpty()) { setStatus(prefs, "Belum login"); return }
         val cursor = prefs.cursor
-        val sb = StringBuilder(base).append("/api/notify/feed?token=")
-            .append(URLEncoder.encode(token, "UTF-8"))
+        val sb = StringBuilder(prefs.baseUrl).append("/api/notify/feed?token=").append(token)
         if (cursor.isNotEmpty()) sb.append("&since=").append(cursor)
 
         val conn = (URL(sb.toString()).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 15000
-            readTimeout = 20000
-            requestMethod = "GET"
+            connectTimeout = 15000; readTimeout = 20000; requestMethod = "GET"
             setRequestProperty("Accept", "application/json")
         }
         try {
             val code = conn.responseCode
-            if (code == 401) { setStatus(prefs, "Token salah (401)"); return }
+            if (code == 401) { setStatus(prefs, "Sesi tak sah (401) — login ulang"); return }
             if (code != 200) { setStatus(prefs, "Server $code · " + nowHm()); return }
-            val body = conn.inputStream.bufferedReader().readText()
-            val j = JSONObject(body)
+            val j = JSONObject(conn.inputStream.bufferedReader().readText())
             prefs.cursor = j.optString("cursor", cursor)
             val arr = j.optJSONArray("events")
             var shown = 0
             if (arr != null) {
                 for (i in 0 until arr.length()) {
                     val e = arr.getJSONObject(i)
-                    notifyEvent(
-                        e.optString("type"),
-                        e.optString("title", "Notifikasi"),
-                        e.optString("body", ""),
-                        e.optString("key", System.nanoTime().toString())
-                    )
+                    val type = e.optString("type")
+                    val title = e.optString("title", "Notifikasi")
+                    val body = e.optString("body", "")
+                    val ts = e.optLong("ts", System.currentTimeMillis() / 1000)
+                    notifyEvent(type, title, body, e.optString("key", System.nanoTime().toString()))
+                    prefs.addHistory(type, title, body, ts * 1000)
                     shown++
                 }
             }
-            setStatus(prefs, if (shown > 0) "Aktif · $shown notif baru · " + nowHm() else "Aktif · dicek " + nowHm())
+            setStatus(prefs, if (shown > 0) "$shown notif baru · " + nowHm() else "Aktif · dicek " + nowHm())
         } finally {
             conn.disconnect()
         }
@@ -121,31 +110,25 @@ class NotifierService : Service() {
 
     private fun setStatus(prefs: Prefs, text: String) {
         prefs.lastStatus = text
-        // perbarui teks pada notifikasi tetap
         NotificationManagerCompat.from(this).notify(FG_ID, ongoingNotif(text))
     }
 
-    private fun ongoingNotif(text: String): android.app.Notification {
-        val pi = PendingIntent.getActivity(
-            this, 0, Intent(this, LockActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        return NotificationCompat.Builder(this, App.CH_ONGOING)
+    private fun contentPi(req: Int): PendingIntent = PendingIntent.getActivity(
+        this, req, Intent(this, MainActivity::class.java),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    private fun ongoingNotif(text: String): android.app.Notification =
+        NotificationCompat.Builder(this, App.CH_ONGOING)
             .setContentTitle("Notifikasi aktif")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_stat_notif)
-            .setOngoing(true)
-            .setSilent(true)
-            .setContentIntent(pi)
+            .setOngoing(true).setSilent(true)
+            .setContentIntent(contentPi(0))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-    }
 
     private fun notifyEvent(type: String, title: String, body: String, key: String) {
-        val pi = PendingIntent.getActivity(
-            this, 1, Intent(this, LockActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
         val n = NotificationCompat.Builder(this, App.CH_ALERT)
             .setContentTitle(title)
             .setContentText(body)
@@ -154,9 +137,8 @@ class NotifierService : Service() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setContentIntent(pi)
+            .setContentIntent(contentPi(1))
             .build()
-        // id unik & stabil per event agar tak dobel/timpa
         NotificationManagerCompat.from(this).notify(key.hashCode(), n)
     }
 
@@ -165,5 +147,12 @@ class NotifierService : Service() {
     companion object {
         const val ACTION_STOP = "id.stcautotrade.notif.STOP"
         private const val FG_ID = 1001
+
+        fun start(ctx: android.content.Context) {
+            androidx.core.content.ContextCompat.startForegroundService(ctx, Intent(ctx, NotifierService::class.java))
+        }
+        fun stop(ctx: android.content.Context) {
+            ctx.startService(Intent(ctx, NotifierService::class.java).setAction(ACTION_STOP))
+        }
     }
 }

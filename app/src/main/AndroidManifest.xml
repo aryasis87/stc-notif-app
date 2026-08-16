@@ -18,20 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.STCNotif">
 
-        <!-- Gerbang password = titik masuk (launcher). -->
         <activity
-            android:name=".LockActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Layar utama hanya dibuka dari LockActivity (setelah password benar). -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
 
         <service
             android:name=".NotifierService"

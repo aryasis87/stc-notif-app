@@ -1,55 +1,50 @@
-# STC Notif — aplikasi penerima notifikasi (Android/Kotlin)
+# STC Notif — app Android (Kotlin / Jetpack Compose)
 
-Aplikasi kecil yang **hanya menerima notifikasi realtime** (deposit, penarikan,
-permintaan aktivasi) dari `admin.stcautotrade.id` — **tanpa Google/FCM**. Aplikasi
-menarik (poll) endpoint server sendiri lewat HTTPS, jadi **kebal blokir push
-Google** yang bikin web push gagal. Notifikasi muncul walau app & web tak dibuka.
+Aplikasi native untuk memantau **STC & KOALA** dari HP: notifikasi realtime
+(deposit, penarikan, aktivasi) **tanpa FCM/Google**, plus dashboard admin penuh —
+cukup **login dengan password**, tanpa isi URL/token.
 
-## Cara kerja
-- Foreground service jalan di latar (ada notifikasi tetap "Memantau…").
-- Tiap ±20 dtk cek `GET /api/notify/feed?token=…&since=<cursor>`.
-- Event baru → notifikasi (bunyi + getar). Cursor disimpan lokal (tak dobel).
-- Penarikan diisi server via scan berkala 5 mnt (otomatis, hanya saat app aktif).
+## Fitur (v2.0)
+- **Login password saja** — token diambil dari server otomatis (tidak ditanam di
+  APK). Password kamu ditukar jadi token feed lewat `/api/notify/login`.
+- **Beranda** (native, Apple-like): ringkasan STC & KOALA — total user, aktif,
+  login 24 jam, sesi aktif, mode jalan.
+- **Notifikasi** (native): riwayat deposit/penarikan/aktivasi + tombol pantau
+  mulai/berhenti. Notifikasi tetap muncul walau app ditutup (foreground service).
+- **Dashboard**: seluruh dashboard web (admin.stcautotrade.id) tertanam & **auto-
+  login** — semua fitur seperti bot @san103abot (user, saldo, deposit, penarikan,
+  aktivasi, dll).
+- **Setelan**: pantau latar on/off, notif tes, abaikan optimasi baterai, keluar.
 
-## Build (Android Studio)
-1. **File → Open** → pilih folder `notif-app` ini.
-2. Tunggu **Gradle Sync** selesai (Android Studio unduh Gradle 8.7 + AGP 8.5.2 +
-   SDK yang perlu; ia juga membuat `local.properties` & wrapper otomatis. Kalau
-   diminta soal Gradle wrapper, terima saja / **File → Sync Project with Gradle Files**).
-3. Colok HP (USB debugging) atau pakai emulator → tombol **Run ▶**.
-   Atau bikin APK: **Build → Build App Bundle(s)/APK(s) → Build APK(s)**, lalu
-   pasang file `app/build/outputs/apk/debug/app-debug.apk` ke HP.
+Tanpa FCM → **kebal blokir push Google**. Poll server sendiri lewat HTTPS 443,
+jadi jalan di jaringan mana pun HP berada.
 
-Syarat: Android Studio terbaru (JDK 17 sudah bawaan). minSdk = Android 8 (API 26).
+## Pasang
+Unduh APK dari **Releases** (repo publik):
+`https://github.com/aryasis87/stc-notif-app/releases/latest`
+Buka di HP → izinkan "pasang dari sumber ini" → Install. minSdk Android 8 (API 26).
 
-## Pemakaian (di HP)
-1. Buka app **STC Notif** → masukkan **password** di layar awal (gerbang agar tak
-   dipakai orang lain). Password disimpan sebagai hash SHA-256, bukan teks.
-2. **URL server**: sudah terisi `https://admin.stcautotrade.id`.
-3. **Token**: tempel `NOTIFY_TOKEN` dari server (`~/webadmin-stc/.env` di VPS).
-   Token TIDAK disertakan di repo ini demi keamanan — ambil dari server, atau
-   dari catatan pribadimu. Kalau diganti di server, ganti juga di app.
-4. Tekan **Mulai** → izinkan **notifikasi** saat diminta.
-5. Tekan **Kirim notif tes** untuk memastikan notifikasi tampil.
-6. Tekan **Abaikan optimasi baterai** → izinkan, biar service tak dibunuh sistem.
+> Kalau sebelumnya memasang versi lama dan update ditolak "signature berbeda",
+> uninstall dulu yang lama, lalu pasang yang baru.
 
-Selesai. Begitu ada deposit / penarikan / permintaan aktivasi baru, HP berbunyi
-dengan notifikasinya — tanpa perlu buka web.
+## Pakai
+1. Buka app → **masukkan password** (`Aryasis87@`). Itu saja — tak perlu URL/token.
+2. Izinkan **notifikasi** saat diminta.
+3. Buka **Setelan → Abaikan optimasi baterai** (biar tak dibunuh sistem).
+4. Selesai. Beranda, Notifikasi, dan Dashboard langsung siap.
 
-## Keandalan (penting di HP Android)
-- Biarkan notifikasi tetap **"Memantau…"** hidup (itu wajib agar Android tak
-  membunuh app). Jangan swipe-hapus.
-- **Abaikan optimasi baterai** untuk app ini (tombol tersedia di dalam app).
-- Sebagian HP (Xiaomi/Oppo/Vivo/Samsung) punya "auto-start"/penghemat baterai
-  agresif — izinkan **Autostart** & kunci app di recent apps bila perlu.
-- Reboot HP → app nyala lagi otomatis (kalau tadinya aktif).
+## Keandalan (Android)
+- Biarkan notifikasi tetap **"Memantau…"** hidup (jangan swipe-hapus).
+- Sebagian HP (Xiaomi/Oppo/Vivo) perlu izin **Autostart** & kunci di recent apps.
+- Reboot → app nyala lagi otomatis kalau tadinya aktif.
+
+## Build sendiri
+Buka folder ini di **Android Studio** → Gradle sync → Run/Build APK.
+Toolchain: AGP 8.10.1, Kotlin 2.0.21, Gradle 8.14.3, Compose BOM 2024.09.00,
+compileSdk 35 / minSdk 26 / targetSdk 34. Keystore rilis (`*.jks` +
+`keystore.properties`) tidak ikut di repo — buat sendiri untuk build release.
 
 ## Keamanan
-- Token = kunci akses feed. Jangan dibagikan. Ganti dengan menaruh
-  `NOTIFY_TOKEN` baru di `.env` server lalu perbarui di app.
-- Feed hanya membaca ringkasan event (judul + isi), tak ada kredensial user.
-
-## Ganti nama/ikon app
-- Nama: `app/src/main/res/values/strings.xml` (`app_name`).
-- Ikon: `app/src/main/res/drawable/ic_launcher_foreground.xml` + warna latar di
-  `values/colors.xml` (`ic_launcher_background`).
+- Token **tidak** ada di APK — hanya didapat setelah password benar.
+- Password dipakai lokal (app-private) untuk auto-login dashboard.
+- Repo publik, tapi **tanpa** token/keystore/kredensial apa pun.

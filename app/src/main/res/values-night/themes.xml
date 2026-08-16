@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema window minimal (tanpa action bar); UI sebenarnya digambar Compose. -->
-    <style name="Theme.STCNotif" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.STCNotif" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/win_bg</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
