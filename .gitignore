@@ -1,0 +1,20 @@
+# Gradle / build
+.gradle/
+build/
+app/build/
+local.properties
+captures/
+
+# Signing — JANGAN pernah commit (rahasia!)
+*.jks
+*.keystore
+keystore.properties
+
+# APK (dibagikan lewat GitHub Releases, bukan di-commit)
+*.apk
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
