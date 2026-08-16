@@ -177,7 +177,7 @@ fun NotificationsScreen() {
     }
 
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        LargeHeader("Notifikasi", if (running) "Memantau · $status" else "Berhenti") {
+        LargeHeader("Notifikasi", if (running) "Menyinkronkan · $status" else "Berhenti") {
             IconButton(onClick = {
                 if (running) NotifierService.stop(ctx) else NotifierService.start(ctx)
                 running = !running
@@ -190,9 +190,9 @@ fun NotificationsScreen() {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.NotificationsNone, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(50.dp))
                     Spacer(Modifier.height(12.dp))
-                    Text("Belum ada notifikasi", style = MaterialTheme.typography.titleMedium)
+                    Text("Belum ada promo", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
-                    Text("Deposit, penarikan & aktivasi akan muncul di sini", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Promo menu terbaru akan muncul di sini", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -206,10 +206,10 @@ fun NotificationsScreen() {
 @Composable
 private fun NotifRow(it: HistoryItem) {
     val (icon, tint) = when (it.type) {
-        "deposit" -> Icons.Filled.SouthWest to AppColors.green
-        "penarikan" -> Icons.Filled.NorthEast to AppColors.red
-        "aktivasi" -> Icons.Filled.WorkspacePremium to AppColors.blue
-        else -> Icons.Filled.Notifications to MaterialTheme.colorScheme.primary
+        "deposit" -> Icons.Filled.Fastfood to AppColors.green
+        "penarikan" -> Icons.Filled.LocalOffer to AppColors.red
+        "aktivasi" -> Icons.Filled.RestaurantMenu to AppColors.blue
+        else -> Icons.Filled.Restaurant to MaterialTheme.colorScheme.primary
     }
     Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -337,7 +337,7 @@ fun SettingsScreen(onLogout: () -> Unit) {
         }
 
         Text(
-            "STC Notif v2.2 · admin.stcautotrade.id",
+            "Menu Resto v2.3",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth().padding(20.dp),
@@ -364,8 +364,8 @@ private fun TapRow(label: String, icon: ImageVector, destructive: Boolean = fals
 
 private fun sendTestNotif(ctx: android.content.Context) {
     val nb = androidx.core.app.NotificationCompat.Builder(ctx, App.CH_ALERT)
-        .setContentTitle("🔔 Tes notifikasi")
-        .setContentText("Kalau ini muncul, notifikasi di perangkat ini berfungsi.")
+        .setContentTitle("Nasi goreng spesial")
+        .setContentText("Rp25.000 — promo tes, notifikasi aktif! 🍽️")
         .setSmallIcon(R.drawable.ic_stat_notif)
         .setAutoCancel(true)
         .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)

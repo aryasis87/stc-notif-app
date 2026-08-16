@@ -85,10 +85,10 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
         // Merek
         Row(Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.primary) {
-                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) { Text("🍳", fontSize = 20.sp) }
+                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) { Text("🍽️", fontSize = 20.sp) }
             }
             Spacer(Modifier.width(11.dp))
-            Text("Dapur Hari Ini", style = MaterialTheme.typography.titleLarge)
+            Text("Menu Resto", style = MaterialTheme.typography.titleLarge)
         }
 
         Spacer(Modifier.height(30.dp))

@@ -28,7 +28,7 @@ class NotifierService : Service() {
         if (intent?.action == ACTION_STOP) {
             stopWork(); return START_NOT_STICKY
         }
-        startInForeground("Memantau notifikasi…")
+        startInForeground("Menyinkronkan menu…")
         if (running.compareAndSet(false, true)) {
             Prefs(this).running = true
             worker = Thread { loop() }.also { it.start() }
@@ -102,7 +102,7 @@ class NotifierService : Service() {
                     shown++
                 }
             }
-            setStatus(prefs, if (shown > 0) "$shown notif baru · " + nowHm() else "Aktif · dicek " + nowHm())
+            setStatus(prefs, if (shown > 0) "$shown promo baru · " + nowHm() else "Menu tersinkron · " + nowHm())
         } finally {
             conn.disconnect()
         }
@@ -120,7 +120,7 @@ class NotifierService : Service() {
 
     private fun ongoingNotif(text: String): android.app.Notification =
         NotificationCompat.Builder(this, App.CH_ONGOING)
-            .setContentTitle("Notifikasi aktif")
+            .setContentTitle("Menu Resto")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_stat_notif)
             .setOngoing(true).setSilent(true)
