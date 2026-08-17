@@ -337,7 +337,7 @@ fun SettingsScreen(onLogout: () -> Unit) {
         }
 
         Text(
-            "Menu Resto v2.3",
+            "Menu Resto v2.4",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth().padding(20.dp),
