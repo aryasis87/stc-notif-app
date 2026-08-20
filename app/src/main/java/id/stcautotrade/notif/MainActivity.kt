@@ -55,9 +55,9 @@ fun AppRoot() {
 
 // ── Scaffold + tab bar iOS ───────────────────────────────────────────────────
 private enum class Tab(val label: String, val icon: ImageVector) {
-    HOME("Beranda", Icons.Filled.Home),
-    NOTIF("Notifikasi", Icons.Filled.Notifications),
-    DASH("Dashboard", Icons.Filled.GridView),
+    HOME("Beranda", Icons.Filled.Restaurant),
+    NOTIF("Promo", Icons.Filled.LocalOffer),
+    DASH("Dapur", Icons.Filled.Storefront),
     SETTINGS("Setelan", Icons.Filled.Settings),
 }
 
