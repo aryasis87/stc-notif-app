@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,6 +38,20 @@ import java.util.Date
 import java.util.Locale
 
 // ── Data samaran resto ────────────────────────────────────────────────────────
+private data class HPromo(val emoji: String, val title: String, val sub: String, val a: Color, val b: Color)
+private val HOME_PROMOS = listOf(
+    HPromo("🔥", "Diskon 50%", "Menu pilihan hari ini", AppColors.red, AppColors.amber),
+    HPromo("🚚", "Gratis Ongkir", "Min. belanja Rp 50rb", AppColors.blue, Color(0xFF5AC8FA)),
+    HPromo("💸", "Cashback 20%", "Bayar via e-wallet", AppColors.green, Color(0xFF30D158)),
+)
+private data class HFeat(val emoji: String, val name: String, val old: String, val price: String, val rating: String)
+private val HOME_FEATURED = listOf(
+    HFeat("🍔", "Beef Burger", "Rp 45.000", "Rp 32.000", "4.9"),
+    HFeat("🍗", "Ayam Geprek", "Rp 30.000", "Rp 22.000", "4.8"),
+    HFeat("🍕", "Pizza Beef", "Rp 75.000", "Rp 55.000", "4.7"),
+    HFeat("🍜", "Mie Bakso", "Rp 30.000", "Rp 24.000", "4.8"),
+)
+
 private data class MenuDish(val emoji: String, val name: String, val desc: String, val price: String, val rating: String)
 private val FAVORITES = listOf(
     MenuDish("🍔", "Beef Burger Spesial", "Daging sapi panggang, keju cheddar, saus signature", "Rp 32.000", "4.9"),
@@ -77,85 +92,131 @@ private fun accentBrush() = Brush.linearGradient(
     listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.78f)),
 )
 
-// ── BERANDA — landing resto ──────────────────────────────────────────────────
+// ── BERANDA — home food-delivery ─────────────────────────────────────────────
 @Composable
 fun HomeScreen() {
-    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
-        // Hero
-        Box(
-            Modifier.fillMaxWidth().padding(16.dp).clip(MaterialTheme.shapes.large)
-                .background(accentBrush()).padding(20.dp),
+    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
+        // Top bar: sapaan + lokasi antar + lonceng
+        Row(
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column {
-                Text("Dapur Hari Ini", style = MaterialTheme.typography.displaySmall, color = Color.White)
-                Spacer(Modifier.height(4.dp))
-                Text("Masakan rumahan, diantar hangat 🍲", style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.92f))
-                Spacer(Modifier.height(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Halo, selamat datang 👋", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(1.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Pill("⭐ 4.9")
-                    Spacer(Modifier.width(8.dp))
-                    Pill("1.2rb+ ulasan")
-                    Spacer(Modifier.width(8.dp))
-                    Pill("Buka 09.00–22.00")
+                    Icon(Icons.Filled.Place, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(3.dp))
+                    Text("Antar ke: Rumah", style = MaterialTheme.typography.titleMedium)
+                    Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                }
+            }
+            Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp)) {
+                Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.NotificationsNone, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(21.dp))
                 }
             }
         }
 
-        // Search palsu (dekoratif)
+        // Search
         Surface(
-            color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
         ) {
-            Row(Modifier.padding(horizontal = 16.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(10.dp))
-                Text("Cari menu favoritmu…", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+                Text("Cari menu favoritmu…", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Icon(Icons.Filled.Tune, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             }
         }
 
+        // Promo carousel
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.horizontalScroll(rememberScrollState()).padding(start = 16.dp, end = 4.dp)) {
+            HOME_PROMOS.forEach { p -> PromoCard(p); Spacer(Modifier.width(12.dp)) }
+        }
+
         // Kategori
-        SectionLabel("Kategori")
+        SectionHeaderRow("Kategori")
         Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             CATEGORIES.forEach { (emoji, name) ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(end = 12.dp),
-                ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
-                        shape = RoundedCornerShape(18.dp),
-                    ) { Box(Modifier.size(60.dp), contentAlignment = Alignment.Center) { Text(emoji, fontSize = 28.sp) } }
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 14.dp)) {
+                    Surface(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f), shape = RoundedCornerShape(20.dp)) {
+                        Box(Modifier.size(62.dp), contentAlignment = Alignment.Center) { Text(emoji, fontSize = 28.sp) }
+                    }
                     Spacer(Modifier.height(6.dp))
                     Text(name, style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
 
-        // Promo banner
-        Box(
-            Modifier.fillMaxWidth().padding(16.dp).clip(MaterialTheme.shapes.medium)
-                .background(Brush.linearGradient(listOf(AppColors.amber, AppColors.red)))
-                .padding(18.dp),
-        ) {
-            Column {
-                Text("Promo Spesial Hari Ini 🔥", style = MaterialTheme.typography.titleLarge, color = Color.White)
-                Spacer(Modifier.height(3.dp))
-                Text("Diskon 30% untuk menu pilihan · gratis ongkir min. Rp 50.000", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.95f))
-            }
+        // Lagi diskon (featured horizontal)
+        SectionHeaderRow("Lagi Diskon 🔥", "Lihat semua")
+        Row(Modifier.horizontalScroll(rememberScrollState()).padding(start = 16.dp, end = 4.dp)) {
+            HOME_FEATURED.forEach { f -> FeaturedCard(f); Spacer(Modifier.width(12.dp)) }
         }
 
-        // Menu favorit
-        SectionLabel("Menu Favorit")
+        // Menu favorit (vertikal)
+        SectionHeaderRow("Menu Favorit", "Lihat semua")
         FAVORITES.forEach { d -> MenuDishCard(d) }
-
-        Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun Pill(text: String) {
-    Surface(color = Color.White.copy(alpha = 0.22f), shape = RoundedCornerShape(20.dp)) {
-        Text(text, color = Color.White, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
+private fun SectionHeaderRow(title: String, action: String? = null) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 20.dp, end = 18.dp, top = 22.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+        if (action != null) Text(action, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun PromoCard(p: HPromo) {
+    Box(
+        Modifier.width(280.dp).height(118.dp).clip(MaterialTheme.shapes.large)
+            .background(Brush.linearGradient(listOf(p.a, p.b))).padding(18.dp),
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Text("${p.emoji}  ${p.title}", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Spacer(Modifier.height(3.dp))
+            Text(p.sub, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.95f))
+            Spacer(Modifier.weight(1f))
+            Surface(color = Color.White.copy(alpha = 0.25f), shape = RoundedCornerShape(20.dp)) {
+                Text("Klaim sekarang", color = Color.White, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeaturedCard(f: HFeat) {
+    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium, modifier = Modifier.width(152.dp)) {
+        Column {
+            Box(
+                Modifier.fillMaxWidth().height(92.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(f.emoji, fontSize = 46.sp)
+                Surface(color = AppColors.red, shape = RoundedCornerShape(bottomEnd = 10.dp), modifier = Modifier.align(Alignment.TopStart)) {
+                    Text("HEMAT", color = Color.White, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp))
+                }
+            }
+            Column(Modifier.padding(11.dp)) {
+                Text(f.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                Spacer(Modifier.height(2.dp))
+                Text("⭐ ${f.rating}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(5.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(f.old, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textDecoration = TextDecoration.LineThrough)
+                    Spacer(Modifier.width(6.dp))
+                    Text(f.price, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
     }
 }
 
