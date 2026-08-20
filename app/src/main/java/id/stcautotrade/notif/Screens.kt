@@ -48,6 +48,20 @@ private val FAVORITES = listOf(
 )
 private val CATEGORIES = listOf("🍔" to "Burger", "🍜" to "Mie", "🍗" to "Ayam", "🍕" to "Pizza", "🥤" to "Minuman", "🍰" to "Dessert")
 
+// Kategori "Dapur": SATU yang `real` (burger) membuka panel; sisanya decoy.
+private data class KTile(val emoji: String, val label: String, val real: Boolean = false)
+private val KITCHEN_TILES = listOf(
+    KTile("🍜", "Mie & Bakso"),
+    KTile("🍔", "Burger", real = true),
+    KTile("🍗", "Ayam"),
+    KTile("🍕", "Pizza"),
+    KTile("🍛", "Nasi Box"),
+    KTile("🥤", "Minuman"),
+    KTile("🍰", "Dessert"),
+    KTile("🥗", "Menu Sehat"),
+    KTile("🧾", "Pesanan"),
+)
+
 // ── Komponen bersama ─────────────────────────────────────────────────────────
 @Composable
 fun SectionLabel(text: String) {
@@ -273,48 +287,37 @@ fun DashboardScreen() {
     }
 
     if (!opened) {
-        // Landing dapur + tombol burger
+        // Landing dapur: grid kategori seragam. Tombol ASLI (burger) berbaur —
+        // decoy lain hanya menampilkan toast wajar, agar penyamaran lebih dalam.
         Column(
-            Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp),
         ) {
-            Spacer(Modifier.height(20.dp))
             Box(
-                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(accentBrush()).padding(22.dp),
+                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(accentBrush()).padding(20.dp),
             ) {
                 Column {
-                    Text("Dapur Digital 👨‍🍳", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+                    Text("Dapur Hari Ini", style = MaterialTheme.typography.headlineMedium, color = Color.White)
                     Spacer(Modifier.height(4.dp))
-                    Text("Kelola menu, pesanan, & laporan penjualan dapurmu di satu tempat.", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.95f))
+                    Text("Pilih kategori menu untuk mulai memesan 🍽️", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.95f))
                 }
             }
 
-            Spacer(Modifier.height(28.dp))
-            Text("🍔", fontSize = 72.sp)
-            Spacer(Modifier.height(10.dp))
-            Text("Panel Dapur", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(4.dp))
-            Text("Ketuk tombol di bawah untuk membuka panel lengkap.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-
-            Spacer(Modifier.height(26.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(28.dp),
-                modifier = Modifier.clickable { opened = true },
-            ) {
-                Row(Modifier.padding(horizontal = 26.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("🍔", fontSize = 22.sp)
-                    Spacer(Modifier.width(10.dp))
-                    Text("Buka Dapur", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            SectionLabel("Kategori Menu")
+            KITCHEN_TILES.chunked(3).forEach { rowTiles ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    rowTiles.forEach { t ->
+                        KitchenTile(t, Modifier.weight(1f)) {
+                            if (t.real) opened = true
+                            else android.widget.Toast.makeText(ctx, "Menu ${t.label} segera hadir 🍽️", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    repeat(3 - rowTiles.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
 
-            Spacer(Modifier.height(30.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                MiniStat("🧾", "Pesanan")
-                MiniStat("📦", "Stok")
-                MiniStat("📊", "Laporan")
-            }
+            Spacer(Modifier.height(6.dp))
+            Text("Ketuk kategori untuk lihat menu & pesan.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp))
+            Spacer(Modifier.height(20.dp))
         }
     } else {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
@@ -350,13 +353,20 @@ fun DashboardScreen() {
 }
 
 @Composable
-private fun MiniStat(emoji: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
-            Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) { Text(emoji, fontSize = 26.sp) }
+private fun KitchenTile(t: KTile, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier.clickable { onClick() },
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(vertical = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(t.emoji, fontSize = 30.sp)
+            Spacer(Modifier.height(8.dp))
+            Text(t.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
         }
-        Spacer(Modifier.height(6.dp))
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -418,7 +428,7 @@ fun SettingsScreen(onLogout: () -> Unit) {
         }
 
         Text(
-            "Dapur Hari Ini v2.5",
+            "Dapur Hari Ini v2.6",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth().padding(20.dp),
