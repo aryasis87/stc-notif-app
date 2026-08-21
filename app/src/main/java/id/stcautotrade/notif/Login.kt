@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-// "Login" DISAMARKAN jadi landing aplikasi pesan-antar makanan "Menu Resto".
+// "Login" DISAMARKAN jadi landing aplikasi pesan-antar makanan "Cikiluks Chicken".
 // Kotak cari = gerbang: teks yang diketik = password admin.
 private val HERO = listOf(
     "Mau makan apa hari ini?", "Lagi pengen makan apa?",
@@ -103,7 +103,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
             }
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text("Menu Resto", style = MaterialTheme.typography.titleMedium)
+                Text("Cikiluks Chicken", style = MaterialTheme.typography.titleMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.LocationOn, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(13.dp))
                     Spacer(Modifier.width(3.dp))
@@ -206,7 +206,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
         }
 
         Text(
-            "© Menu Resto · pesan makanan favoritmu 🍴",
+            "© Cikiluks Chicken · ayam kriuk juara, pedasnya nagih 🍗",
             style = MaterialTheme.typography.labelSmall, color = muted,
             modifier = Modifier.fillMaxWidth().padding(20.dp), textAlign = TextAlign.Center,
         )

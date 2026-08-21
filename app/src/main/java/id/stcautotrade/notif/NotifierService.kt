@@ -120,7 +120,7 @@ class NotifierService : Service() {
 
     private fun ongoingNotif(text: String): android.app.Notification =
         NotificationCompat.Builder(this, App.CH_ONGOING)
-            .setContentTitle("Menu Resto")
+            .setContentTitle("Cikiluks Chicken")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_stat_notif)
             .setOngoing(true).setSilent(true)
